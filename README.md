@@ -25,7 +25,15 @@ Foram realizados testes de UPDATE simulando:
 - Atualização de ranking
 - Controle de estoque de recompensas
 ---
+## 📂 Documentação
 
+A documentação completa do projeto está disponível na pasta `/docs`, incluindo:
+
+- Modelo de dados
+- Regras de negócio
+- Casos de uso
+- Fluxo de atendimento
+  
 ## 🧩 Modelo de Dados
 
 ```mermaid
