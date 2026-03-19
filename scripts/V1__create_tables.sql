@@ -1,122 +1,186 @@
 -- =====================================
--- SERVIDORES (SETORES / UNIDADES)
+-- MODULO USUARIOS
 -- =====================================
 
-INSERT INTO public.servidor (id, nome, meta) VALUES 
-(1, 'Suporte Técnico', 1000),
-(2, 'Financeiro', 800),
-(3, 'Atendimento Geral (SAC)', 1200)
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS usuario (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('cliente', 'atendente'))
+);
+
+CREATE TABLE IF NOT EXISTS cliente (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT UNIQUE NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    telefone VARCHAR(20),
+
+    CONSTRAINT fk_cliente_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS atendente (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT UNIQUE NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    setor VARCHAR(100) NOT NULL,
+    matricula VARCHAR(50) UNIQUE NOT NULL,
+
+    CONSTRAINT fk_atendente_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+);
 
 -- =====================================
--- STATUS
+-- MODULO ATENDIMENTO
 -- =====================================
 
-INSERT INTO public.status (id, descricao) VALUES 
-(1, 'Aguardando atendimento'),
-(2, 'Finalizado'),
-(3, 'Em atendimento')
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS prioridade (
+    id SERIAL PRIMARY KEY,
+    descricao VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS status (
+    id SERIAL PRIMARY KEY,
+    descricao VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS atendimento (
+    id SERIAL PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_atendente INT NOT NULL,
+    id_prioridade INT NOT NULL,
+    id_status INT NOT NULL,
+    data_chegada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_inicio TIMESTAMP,
+    data_fim TIMESTAMP,
+    resolvido_primeiro_contato BOOLEAN DEFAULT FALSE,
+
+    CONSTRAINT fk_atendimento_cliente
+        FOREIGN KEY (id_cliente)
+        REFERENCES cliente(id),
+
+    CONSTRAINT fk_atendimento_atendente
+        FOREIGN KEY (id_atendente)
+        REFERENCES atendente(id),
+
+    CONSTRAINT fk_atendimento_prioridade
+        FOREIGN KEY (id_prioridade)
+        REFERENCES prioridade(id),
+
+    CONSTRAINT fk_atendimento_status
+        FOREIGN KEY (id_status)
+        REFERENCES status(id)
+);
+
+CREATE TABLE IF NOT EXISTS avaliacao (
+    id SERIAL PRIMARY KEY,
+    id_atendimento INT NOT NULL,
+    nota INT CHECK (nota BETWEEN 1 AND 5),
+    comentario TEXT,
+    data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_avaliacao_atendimento
+        FOREIGN KEY (id_atendimento)
+        REFERENCES atendimento(id)
+        ON DELETE CASCADE
+);
 
 -- =====================================
--- PRIORIDADE
+-- MODULO GAMIFICACAO
 -- =====================================
 
-INSERT INTO public.prioridade (id, descricao) VALUES 
-(1, 'Baixa'),
-(2, 'Média'),
-(3, 'Alta')
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS pontuacao (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT UNIQUE NOT NULL,
+    pontos_total INT DEFAULT 0 CHECK (pontos_total >= 0),
+    nivel_atual INT DEFAULT 1 CHECK (nivel_atual > 0),
+    ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_pontuacao_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS badge (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    pontos_necessarios INT NOT NULL CHECK (pontos_necessarios >= 0)
+);
+
+CREATE TABLE IF NOT EXISTS usuario_badge (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_badge INT NOT NULL,
+    data_conquista TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_usuario_badge_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id),
+
+    CONSTRAINT fk_usuario_badge_badge
+        FOREIGN KEY (id_badge)
+        REFERENCES badge(id),
+
+    CONSTRAINT unique_usuario_badge UNIQUE (id_usuario, id_badge)
+);
+
+CREATE TABLE IF NOT EXISTS ranking_mensal (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    posicao INT,
+    pontuacao_mes INT,
+    referencia_mes VARCHAR(7) NOT NULL,
+
+    CONSTRAINT fk_ranking_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id)
+);
+
+CREATE TABLE IF NOT EXISTS meta_atendente (
+    id SERIAL PRIMARY KEY,
+    id_atendente INT NOT NULL,
+    meta_pontos INT,
+    meta_atendimentos INT,
+    referencia_mes VARCHAR(7) NOT NULL,
+
+    CONSTRAINT fk_meta_atendente
+        FOREIGN KEY (id_atendente)
+        REFERENCES atendente(id)
+);
 
 -- =====================================
--- SEXO
+-- MODULO LOJA DE RECOMPENSAS
 -- =====================================
 
-INSERT INTO public.sexo (id, sexo) VALUES 
-(1, 'Masculino'),
-(2, 'Feminino'),
-(3, 'Não informado')
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS recompensa (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    custo_pontos INT NOT NULL CHECK (custo_pontos > 0),
+    estoque INT DEFAULT 0 CHECK (estoque >= 0),
+    ativa BOOLEAN DEFAULT TRUE
+);
 
--- =====================================
--- PRÊMIOS (GAMIFICAÇÃO)
--- =====================================
+CREATE TABLE IF NOT EXISTS resgate_recompensa (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_recompensa INT NOT NULL,
+    pontos_gastos INT NOT NULL,
+    data_resgate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status_resgate VARCHAR(50) DEFAULT 'PENDENTE',
 
-INSERT INTO public.premio (id, premio) VALUES 
-(1, 'Vale-refeição R$100'),
-(2, 'Day Off'),
-(3, 'Voucher Amazon R$200')
-ON CONFLICT (id) DO NOTHING;
+    CONSTRAINT fk_resgate_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id),
 
--- =====================================
--- PESSOAS (CLIENTES E ATENDENTES)
--- =====================================
-
-INSERT INTO public.pessoa 
-(id, nome, id_sexo, cpf, telefone, email, data_nascimento, id_servidor) 
-VALUES 
-(1, 'João Carlos Silva', 1, '12345678901', '11987654321', 'joao.silva@email.com', '1995-06-15', 3),
-(2, 'Maria Fernanda Souza', 2, '23456789012', '11976543210', 'maria.souza@email.com', '1992-03-22', 3),
-(3, 'Lucas Oliveira Santos', 1, '34567890123', '11965432109', 'lucas.santos@email.com', '2000-01-10', 3),
-(4, 'Ana Paula Costa', 2, '45678901234', '11954321098', 'ana.costa@empresa.com', '1988-09-05', 1),
-(5, 'Carlos Henrique Alves', 1, '56789012345', '11943210987', 'carlos.alves@empresa.com', '1985-12-11', 1),
-(6, 'Fernanda Lima Rocha', 2, '67890123456', '11932109876', 'fernanda.rocha@empresa.com', '1990-07-30', 2)
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- ATENDENTES
--- =====================================
-
-INSERT INTO public.atendentes 
-(id, id_pessoa, cargo, data_inicio, data_fim) 
-VALUES 
-(1, 4, 'Analista de Suporte', '2021-02-01', NULL),
-(2, 5, 'Especialista em TI', '2020-08-15', NULL),
-(3, 6, 'Analista Financeiro', '2022-01-10', NULL)
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- ATENDIMENTOS
--- =====================================
-
-INSERT INTO public.atendimento 
-(id, id_pessoa, id_atendente, id_status, id_prioridade, data_chegada, data_inicio, data_fim) 
-VALUES 
-(1, 1, 1, 2, 3, '2024-03-10 09:00', '2024-03-10 09:05', '2024-03-10 09:30'),
-(2, 2, 2, 3, 2, '2024-03-11 10:15', '2024-03-11 10:20', NULL),
-(3, 3, 3, 1, 1, '2024-03-12 14:00', NULL, NULL)
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- AVALIAÇÕES
--- =====================================
-
-INSERT INTO public.avaliacao 
-(id, id_atendimento, nota, observacoes) 
-VALUES 
-(1, 1, 5, 'Atendimento rápido e resolveu meu problema.'),
-(2, 2, 4, 'Bom atendimento, mas demorou um pouco.')
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- METAS BATIDAS
--- =====================================
-
-INSERT INTO public.metas_batidas 
-(id, meta_batida, data_batida, id_premio, id_atendente) 
-VALUES 
-(1, 'Meta mensal de atendimentos atingida', '2024-03-01', 2, 1),
-(2, 'Maior pontuação do mês', '2024-03-01', 3, 2)
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- LOJA DE RECOMPENSAS
--- =====================================
-
-INSERT INTO public.loja 
-(id, id_premio, preco_recompensa, quantidade, id_atendente, data_retirada, data_adicao) 
-VALUES 
-(1, 1, 500.0, 20, NULL, NULL, '2024-01-01'),
-(2, 2, 1000.0, 10, 1, '2024-03-12', '2024-01-01'),
-(3, 3, 1500.0, 5, NULL, NULL, '2024-01-01')
-ON CONFLICT (id) DO NOTHING;
+    CONSTRAINT fk_resgate_recompensa
+        FOREIGN KEY (id_recompensa)
+        REFERENCES recompensa(id)
+);
