@@ -1,62 +1,26 @@
-# SGA Gamificado
-# 🎮 SGA Gamificado
-🎮 SGA GAMIFICADO + LOJA DE RECOMPENSAS
-📌 Tema do Projeto
+# 🎯 Sistema de Gestão de Atendimento Gamificado (SGA)
 
-O projeto propõe o desenvolvimento de um Sistema de Gestão de Atendimento (SGA) com Gamificação e Loja de Recompensas, modelado por meio de diagrama ER utilizando a linguagem Mermaid.
+## 📌 Descrição do Projeto
+Este projeto tem como objetivo desenvolver um sistema de gestão de atendimento com foco em organização de filas, controle de atendimentos e aplicação de técnicas de gamificação para motivar atendentes.
 
-A proposta integra conceitos de Engenharia de Software, Banco de Dados e Gamificação, aplicando mecânicas de jogos em um sistema corporativo de atendimento.
+## 🎯 Objetivo Geral
+Criar um sistema capaz de:
+- Gerenciar clientes e atendentes
+- Controlar atendimentos
+- Avaliar serviços prestados
+- Aplicar pontuação, ranking e recompensas
 
-🎯 Objetivo Geral
+## 👥 Público-Alvo
+- Empresas com atendimento ao cliente
+- Call centers
+- Clínicas, bancos e suporte técnico
 
-Desenvolver um modelo estruturado de Sistema de Gestão de Atendimento que utilize elementos de gamificação — como pontos, níveis, badges, ranking e metas — além de uma loja de recompensas integrada, com o objetivo de:
+---
 
-Aumentar o engajamento dos atendentes
+## 🧩 Modelo de Dados
 
-Incentivar a melhoria da qualidade do atendimento
-
-Estimular a participação ativa dos clientes
-
-Criar um ambiente organizacional mais motivador e produtivo
-
-💡 Justificativa
-
-Sistemas tradicionais de atendimento costumam ser operacionais e pouco motivadores.
-Ao integrar gamificação e recompensas, o sistema passa a:
-
-Estimular desempenho
-
-Promover reconhecimento
-
-Criar competição saudável
-
-Melhorar indicadores de satisfação
-
-🧩 Diferencial do Projeto
-
-O sistema inclui:
-
-Controle de usuários (cliente e atendente)
-
-Gestão completa de atendimentos
-
-Sistema de pontuação e níveis
-
-Badges (conquistas)
-
-Ranking mensal
-
-Metas para atendentes
-
-Loja de recompensas com controle de estoque
-
-Histórico de resgates
-
-Modelo relacional estruturado em Mermaid
-
-🚀 Resultado Esperado
-
-Espera-se que o modelo proposto demonstre como a gamificação pode ser aplicada de forma estruturada em ambientes corporativos, promovendo melhoria contínua, engajamento e eficiência operacional.
+```mermaid
+(cole aqui seu ER Diagram)
 ```mermaid
 erDiagram
 
