@@ -20,8 +20,6 @@ Criar um sistema capaz de:
 ## 🧩 Modelo de Dados
 
 ```mermaid
-(cole aqui seu ER Diagram)
-```mermaid
 erDiagram
 
     %% =========================
