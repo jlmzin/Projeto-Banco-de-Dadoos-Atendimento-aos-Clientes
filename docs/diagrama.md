@@ -157,16 +157,16 @@ erDiagram
 
 ---
 
-# 📁 `docs/regras_negocio.md`
+📁 `docs/regras_negocio.md`
 
 ```markdown
-# 📜 Regras de Negócio
+📜 Regras de Negócio
 
-## 👤 Usuários
+👤 Usuários
 - Um usuário pode ser cliente ou atendente
 - Cada cliente e atendente está vinculado a um usuário
 
-## 📞 Atendimento
+📞 Atendimento
 - Um cliente pode abrir vários atendimentos
 - Um atendimento possui apenas um atendente
 - Todo atendimento possui prioridade e status
@@ -175,23 +175,23 @@ erDiagram
   - Em atendimento
   - Finalizado
 
-## ⭐ Avaliação
+⭐ Avaliação
 - Um atendimento pode receber uma avaliação
 - A nota varia de 1 a 5
 
-## 🏆 Gamificação
+🏆 Gamificação
 - Atendentes recebem pontos ao finalizar atendimentos
 - Recebem bônus ao resolver no primeiro contato
 - Pontos acumulados definem o nível do usuário
 
-## 🎖️ Badges
+🎖️ Badges
 - Usuários podem conquistar badges conforme pontuação
 
-## 📊 Ranking
+📊 Ranking
 - Ranking é baseado na pontuação total
 - Atualizado mensalmente via procedure
 
-## 🎁 Recompensas
+🎁 Recompensas
 - Usuários podem trocar pontos por recompensas
 - O sistema valida:
   - Saldo de pontos
