@@ -15,6 +15,15 @@ Criar um sistema capaz de:
 - Call centers
 - Clínicas, bancos e suporte técnico
 
+## 🔄 Testes de Atualização
+
+Foram realizados testes de UPDATE simulando:
+
+- Início e finalização de atendimento
+- Incremento de pontuação
+- Evolução de nível
+- Atualização de ranking
+- Controle de estoque de recompensas
 ---
 
 ## 🧩 Modelo de Dados
