@@ -8,38 +8,39 @@ DECLARE
     v_usuario_id INT;
     v_pontos INT;
 BEGIN
-    -- Só executa quando o atendimento for FINALIZADO (status = 2)
+    -- Só executa quando finaliza
     IF NEW.id_status = 2 AND OLD.id_status <> 2 THEN
 
-        -- Busca o usuário do atendente
+        -- Busca usuário do atendente
         SELECT id_usuario INTO v_usuario_id
         FROM atendente
         WHERE id = NEW.id_atendente;
 
-        -- Define pontuação base
+        -- Pontuação base
         v_pontos := 50;
 
-        -- Bonus se resolveu no primeiro contato
-        IF NEW.resolvido_primeiro_contato = TRUE THEN
+        -- Bonus
+        IF NEW.resolvido_primeiro_contato THEN
             v_pontos := v_pontos + 20;
         END IF;
 
-        -- Atualiza pontuação
-        UPDATE pontuacao
-        SET pontos_total = pontos_total + v_pontos,
-            ultima_atualizacao = CURRENT_TIMESTAMP
-        WHERE id_usuario = v_usuario_id;
+        -- Garante que exista pontuação
+        INSERT INTO pontuacao (id_usuario, pontos_total, nivel_atual)
+        VALUES (v_usuario_id, 0, 1)
+        ON CONFLICT (id_usuario) DO NOTHING;
 
-        -- Atualiza nível automaticamente (exemplo simples)
+        -- Atualiza pontos + nível em UMA operação
         UPDATE pontuacao
-        SET nivel_atual = 
-            CASE
-                WHEN pontos_total >= 500 THEN 5
-                WHEN pontos_total >= 300 THEN 4
-                WHEN pontos_total >= 150 THEN 3
-                WHEN pontos_total >= 50 THEN 2
+        SET 
+            pontos_total = pontos_total + v_pontos,
+            nivel_atual = CASE
+                WHEN pontos_total + v_pontos >= 500 THEN 5
+                WHEN pontos_total + v_pontos >= 300 THEN 4
+                WHEN pontos_total + v_pontos >= 150 THEN 3
+                WHEN pontos_total + v_pontos >= 50 THEN 2
                 ELSE 1
-            END
+            END,
+            ultima_atualizacao = CURRENT_TIMESTAMP
         WHERE id_usuario = v_usuario_id;
 
     END IF;
@@ -49,7 +50,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================
--- TRIGGER: DISPARA APÓS UPDATE NO ATENDIMENTO
+-- TRIGGER
 -- =====================================
 
 DROP TRIGGER IF EXISTS trg_adicionar_pontos ON atendimento;
