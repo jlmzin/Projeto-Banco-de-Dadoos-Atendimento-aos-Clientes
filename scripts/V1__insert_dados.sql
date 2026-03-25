@@ -1,18 +1,33 @@
 -- =====================================
--- SERVIDORES (SETORES / UNIDADES)
+-- USUARIOS
 -- =====================================
 
-INSERT INTO public.servidor (id, nome, meta) VALUES 
-(1, 'Suporte Técnico', 1000),
-(2, 'Financeiro', 800),
-(3, 'Atendimento Geral (SAC)', 1200)
+INSERT INTO usuario (id, email, senha, tipo) VALUES
+(1, 'cliente@email.com', '123', 'cliente'),
+(2, 'atendente@email.com', '123', 'atendente')
+ON CONFLICT (id) DO NOTHING;
+
+-- =====================================
+-- CLIENTE
+-- =====================================
+
+INSERT INTO cliente (id, id_usuario, nome, cpf, telefone) VALUES
+(1, 1, 'João Silva', '123.456.789-00', '11999999999')
+ON CONFLICT (id) DO NOTHING;
+
+-- =====================================
+-- ATENDENTE
+-- =====================================
+
+INSERT INTO atendente (id, id_usuario, nome, setor, matricula) VALUES
+(1, 2, 'Maria Souza', 'Suporte', 'MAT001')
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================
 -- STATUS
 -- =====================================
 
-INSERT INTO public.status (id, descricao) VALUES 
+INSERT INTO status (id, descricao) VALUES
 (1, 'Aguardando atendimento'),
 (2, 'Finalizado'),
 (3, 'Em atendimento')
@@ -22,102 +37,59 @@ ON CONFLICT (id) DO NOTHING;
 -- PRIORIDADE
 -- =====================================
 
-INSERT INTO public.prioridade (id, descricao) VALUES 
+INSERT INTO prioridade (id, descricao) VALUES
 (1, 'Baixa'),
 (2, 'Média'),
 (3, 'Alta')
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================
--- SEXO
+-- ATENDIMENTO
 -- =====================================
 
-INSERT INTO public.sexo (id, sexo) VALUES 
-(1, 'Masculino'),
-(2, 'Feminino'),
-(3, 'Não informado')
+INSERT INTO atendimento 
+(id, id_cliente, id_atendente, id_prioridade, id_status, data_chegada)
+VALUES
+(1, 1, 1, 2, 1, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================
--- PRÊMIOS (GAMIFICAÇÃO)
+-- AVALIACAO
 -- =====================================
 
-INSERT INTO public.premio (id, premio) VALUES 
-(1, 'Vale-refeição R$100'),
-(2, 'Day Off'),
-(3, 'Voucher Amazon R$200')
+INSERT INTO avaliacao (id, id_atendimento, nota, comentario)
+VALUES
+(1, 1, 5, 'Ótimo atendimento')
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================
--- PESSOAS (CLIENTES E ATENDENTES)
+-- PONTUACAO
 -- =====================================
 
-INSERT INTO public.pessoa 
-(id, nome, id_sexo, cpf, telefone, email, data_nascimento, id_servidor) 
-VALUES 
-(1, 'João Carlos Silva', 1, '12345678901', '11987654321', 'joao.silva@email.com', '1995-06-15', 3),
-(2, 'Maria Fernanda Souza', 2, '23456789012', '11976543210', 'maria.souza@email.com', '1992-03-22', 3),
-(3, 'Lucas Oliveira Santos', 1, '34567890123', '11965432109', 'lucas.santos@email.com', '2000-01-10', 3),
-(4, 'Ana Paula Costa', 2, '45678901234', '11954321098', 'ana.costa@empresa.com', '1988-09-05', 1),
-(5, 'Carlos Henrique Alves', 1, '56789012345', '11943210987', 'carlos.alves@empresa.com', '1985-12-11', 1),
-(6, 'Fernanda Lima Rocha', 2, '67890123456', '11932109876', 'fernanda.rocha@empresa.com', '1990-07-30', 2)
+INSERT INTO pontuacao (id, id_usuario, pontos_total, nivel_atual)
+VALUES
+(1, 2, 100, 1)
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================
--- ATENDENTES
+-- BADGES
 -- =====================================
 
-INSERT INTO public.atendentes 
-(id, id_pessoa, cargo, data_inicio, data_fim) 
-VALUES 
-(1, 4, 'Analista de Suporte', '2021-02-01', NULL),
-(2, 5, 'Especialista em TI', '2020-08-15', NULL),
-(3, 6, 'Analista Financeiro', '2022-01-10', NULL)
+INSERT INTO badge (id, nome, descricao, pontos_necessarios)
+VALUES
+(1, 'Iniciante', 'Primeiros passos', 50)
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO usuario_badge (id_usuario, id_badge)
+VALUES
+(2, 1)
+ON CONFLICT DO NOTHING;
+
 -- =====================================
--- ATENDIMENTOS
+-- RECOMPENSAS
 -- =====================================
 
-INSERT INTO public.atendimento 
-(id, id_pessoa, id_atendente, id_status, id_prioridade, data_chegada, data_inicio, data_fim) 
-VALUES 
-(1, 1, 1, 2, 3, '2024-03-10 09:00', '2024-03-10 09:05', '2024-03-10 09:30'),
-(2, 2, 2, 3, 2, '2024-03-11 10:15', '2024-03-11 10:20', NULL),
-(3, 3, 3, 1, 1, '2024-03-12 14:00', NULL, NULL)
+INSERT INTO recompensa (id, nome, descricao, custo_pontos, estoque)
+VALUES
+(1, 'Vale R$100', 'Vale alimentação', 100, 10)
 ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- AVALIAÇÕES
--- =====================================
-
-INSERT INTO public.avaliacao 
-(id, id_atendimento, nota, observacoes) 
-VALUES 
-(1, 1, 5, 'Atendimento rápido e resolveu meu problema.'),
-(2, 2, 4, 'Bom atendimento, mas demorou um pouco.')
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- METAS BATIDAS
--- =====================================
-
-INSERT INTO public.metas_batidas 
-(id, meta_batida, data_batida, id_premio, id_atendente) 
-VALUES 
-(1, 'Meta mensal de atendimentos atingida', '2024-03-01', 2, 1),
-(2, 'Maior pontuação do mês', '2024-03-01', 3, 2)
-ON CONFLICT (id) DO NOTHING;
-
--- =====================================
--- LOJA DE RECOMPENSAS
--- =====================================
-
-INSERT INTO public.loja 
-(id, id_premio, preco_recompensa, quantidade, id_atendente, data_retirada, data_adicao) 
-VALUES 
-(1, 1, 500.0, 20, NULL, NULL, '2024-01-01'),
-(2, 2, 1000.0, 10, 1, '2024-03-12', '2024-01-01'),
-(3, 3, 1500.0, 5, NULL, NULL, '2024-01-01')
-ON CONFLICT (id) DO NOTHING;
-
