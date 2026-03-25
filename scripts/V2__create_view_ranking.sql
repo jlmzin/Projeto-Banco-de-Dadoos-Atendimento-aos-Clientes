@@ -1,19 +1,19 @@
 -- =====================================
--- VIEW: RANKING GERAL DE USUÁRIOS
+-- VIEW: RANKING GERAL
 -- =====================================
 
 CREATE OR REPLACE VIEW view_ranking_geral AS
 SELECT 
     u.id AS usuario_id,
     u.email,
-    p.pontos_total,
-    p.nivel_atual,
-    RANK() OVER (ORDER BY p.pontos_total DESC) AS posicao
+    COALESCE(p.pontos_total, 0) AS pontos_total,
+    COALESCE(p.nivel_atual, 1) AS nivel_atual,
+    RANK() OVER (ORDER BY COALESCE(p.pontos_total, 0) DESC) AS posicao
 FROM usuario u
-JOIN pontuacao p ON u.id = p.id_usuario;
+LEFT JOIN pontuacao p ON u.id = p.id_usuario;
 
 -- =====================================
--- VIEW: RANKING DE ATENDENTES
+-- VIEW: RANKING ATENDENTES
 -- =====================================
 
 CREATE OR REPLACE VIEW view_ranking_atendentes AS
@@ -21,15 +21,15 @@ SELECT
     a.id AS atendente_id,
     a.nome,
     a.setor,
-    p.pontos_total,
-    p.nivel_atual,
-    RANK() OVER (ORDER BY p.pontos_total DESC) AS posicao
+    COALESCE(p.pontos_total, 0) AS pontos_total,
+    COALESCE(p.nivel_atual, 1) AS nivel_atual,
+    RANK() OVER (ORDER BY COALESCE(p.pontos_total, 0) DESC) AS posicao
 FROM atendente a
 JOIN usuario u ON a.id_usuario = u.id
-JOIN pontuacao p ON u.id = p.id_usuario;
+LEFT JOIN pontuacao p ON u.id = p.id_usuario;
 
 -- =====================================
--- VIEW: RANKING MENSAL (BASEADO NA TABELA)
+-- VIEW: RANKING MENSAL
 -- =====================================
 
 CREATE OR REPLACE VIEW view_ranking_mensal AS
